@@ -40,6 +40,20 @@ public class ReservationTab {
                     checkOutPicker.getValue().toString()
             );
             messageLabel.setText(result);
+
+            // ✅ Add these lines right here
+            if (result.startsWith("✅")) { // only clear if success
+                nameField.clear();
+                addressField.clear();
+                contactField.clear();
+                emailField.clear();
+                roomTypeBox.setValue(null);
+                checkInPicker.setValue(null);
+                checkOutPicker.setValue(null);
+
+                // put cursor back to Name field
+                nameField.requestFocus();
+            }
         });
 
         VBox vbox = new VBox(10, nameField, addressField, contactField, emailField,

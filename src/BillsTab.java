@@ -18,6 +18,11 @@ public class BillsTab {
                 int customerId = Integer.parseInt(customerIdField.getText());
                 BillsService service = new BillsService();
                 resultLabel.setText(service.calculateBillForCustomer(customerId));
+
+                // ✅ Add clearing here
+                customerIdField.clear();
+                customerIdField.requestFocus();
+
             } catch (NumberFormatException ex) {
                 resultLabel.setText("❌ Please enter a valid Customer ID.");
             }

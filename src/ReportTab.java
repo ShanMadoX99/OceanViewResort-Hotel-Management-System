@@ -116,6 +116,11 @@ public class ReportTab {
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Report exported successfully to: " + file.getAbsolutePath());
                 alert.showAndWait();
+
+                // ✅ Add clearing here
+                customerIdField.clear();
+                customerIdField.requestFocus();
+
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Error exporting report: " + ex.getMessage());
                 alert.showAndWait();

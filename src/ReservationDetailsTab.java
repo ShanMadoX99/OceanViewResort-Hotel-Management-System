@@ -42,11 +42,17 @@ public class ReservationDetailsTab {
                 int customerId = Integer.parseInt(customerIdField.getText());
                 ReservationDetailsService service = new ReservationDetailsService();
                 table.setItems(service.getReservationsByCustomerId(customerId));
+
+
+                // ✅ Add clearing here
+                customerIdField.clear();
+                customerIdField.requestFocus();
             } catch (NumberFormatException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Please enter a valid Customer ID.");
                 alert.showAndWait();
             }
         });
+
 
         VBox vbox = new VBox(10, customerIdField, searchButton, table);
         vbox.setStyle("-fx-padding: 20;");
