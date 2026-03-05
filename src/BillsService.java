@@ -16,35 +16,52 @@ public class BillsService {
             psCust.setInt(1, customerId);
             ResultSet rsCust = psCust.executeQuery();
 
-            String customerName = "Unknown";
-            String contactNo = "Unknown";
-
-            if (rsCust.next()) {
-                customerName = rsCust.getString("name");
-                contactNo = rsCust.getString("contact_no");
+            if (!rsCust.next()) {
+                return null; // ❌ No customer found
             }
 
-            // Step 2: Fetch reservations for this customer
+            String customerName = rsCust.getString("name");
+            String contactNo = rsCust.getString("contact_no");
+
+            // Step 2: Fetch reservations
             String sql = "SELECT room_type, check_in, check_out FROM reservations WHERE customer_id=?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, customerId);
             ResultSet rs = ps.executeQuery();
 
-            long total = 0;
+            long grandTotal = 0;
+            StringBuilder breakdown = new StringBuilder();
+            breakdown.append(String.format("%-10s %-7s %-7s %-7s\n", "Item", "Nights", "Rate", "Total"));
+            breakdown.append("----------------------------------------\n");
+
+            boolean hasReservation = false;
+
             while (rs.next()) {
+                hasReservation = true;
                 String roomType = rs.getString("room_type");
                 LocalDate checkIn = rs.getDate("check_in").toLocalDate();
                 LocalDate checkOut = rs.getDate("check_out").toLocalDate();
 
                 long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
                 int rate = roomType.equalsIgnoreCase("Deluxe") ? 8000 : 5000;
-                total += nights * rate;
+                long total = nights * rate;
+                grandTotal += total;
+
+                breakdown.append(String.format("%-10s %-7d %-7d %-7d\n", roomType, nights, rate, total));
             }
 
-            return "✅ Bill for Customer ID " + customerId +
+            if (!hasReservation) {
+                return null; // ❌ No reservations found
+            }
+
+            breakdown.append("----------------------------------------\n");
+            breakdown.append(String.format("%-10s %-7s %-7s %-7d\n", "Grand", "", "", grandTotal));
+
+            return "Customer ID: " + customerId +
                     "\nName: " + customerName +
                     "\nContact: " + contactNo +
-                    "\nTotal: " + total + " LKR";
+                    "\n\n" + breakdown.toString();
+
         } catch (Exception e) {
             return "❌ Error calculating bill: " + e.getMessage();
         }

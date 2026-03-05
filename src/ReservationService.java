@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -49,7 +50,6 @@ public class ReservationService {
             if (resKeys.next()) {
                 reservationId = resKeys.getInt(1);
             } else {
-                // Fallback: query last inserted reservation for this customer
                 PreparedStatement psFindRes = conn.prepareStatement(
                         "SELECT reservation_id FROM reservations WHERE customer_id=? ORDER BY reservation_id DESC LIMIT 1");
                 psFindRes.setInt(1, customerId);
@@ -102,7 +102,7 @@ public class ReservationService {
         return result;
     }
 
-    // ✅ Read: Get reservations by Customer ID (added back)
+    // ✅ Read: Get reservations by Customer ID
     public ObservableList<ReservationRecord> getReservationsByCustomerId(int customerId) {
         ObservableList<ReservationRecord> result = FXCollections.observableArrayList();
         try {
@@ -135,11 +135,20 @@ public class ReservationService {
         return result;
     }
 
-    // ✅ Update
+    // ✅ Update with date validation
     public String updateReservation(int reservationId, String name, String address,
                                     String contact, String email, String roomType,
                                     String checkIn, String checkOut) {
         try {
+            // Validate dates
+            if (checkIn != null && checkOut != null) {
+                LocalDate inDate = LocalDate.parse(checkIn);
+                LocalDate outDate = LocalDate.parse(checkOut);
+                if (outDate.isBefore(inDate)) {
+                    return "❌ Invalid entry: Check-Out date cannot be earlier than Check-In date.";
+                }
+            }
+
             Connection conn = DBConnection.getConnection();
 
             // Update customer details

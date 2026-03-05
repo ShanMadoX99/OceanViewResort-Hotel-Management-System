@@ -1,6 +1,5 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,23 +34,11 @@ public class ReservationDetailsService {
         return null;
     }
 
-    // ✅ Update: Modify reservation details
+    // ❌ Update restricted: must use Reservation ID
     public String updateReservation(int customerId, String name, String address,
                                     String contact, String email, String roomType,
                                     String checkIn, String checkOut) {
-        ReservationRecord r = findReservationById(customerId);
-        if (r != null) {
-            if (name != null && !name.isEmpty()) r.setCustomerName(name);
-            if (address != null && !address.isEmpty()) r.setAddress(address);
-            if (contact != null && !contact.isEmpty()) r.setContactNo(contact);
-            if (email != null && !email.isEmpty()) r.setEmail(email);
-            if (roomType != null && !roomType.isEmpty()) r.setRoomType(roomType);
-            if (checkIn != null && !checkIn.isEmpty()) r.setCheckIn(checkIn);
-            if (checkOut != null && !checkOut.isEmpty()) r.setCheckOut(checkOut);
-
-            return "✅ Reservation updated successfully!";
-        }
-        return "❌ Reservation not found.";
+        return "❌ Update failed: Updates can only be done using Reservation ID (Customer ID cannot be used).";
     }
 
     // ✅ Delete: Remove reservation

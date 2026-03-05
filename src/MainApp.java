@@ -1,6 +1,9 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -13,8 +16,8 @@ public class MainApp extends Application {
         // Locked menu (tabs disabled until login)
         TabPane tabPane = new TabPane();
         tabPane.setDisable(true); // locked until login
-        // After tabPane is created
 
+        // Add all tabs
         tabPane.getTabs().addAll(
                 ReservationTab.createReservationTab(),
                 ReservationDetailsTab.createReservationDetailsTab(),
@@ -23,12 +26,25 @@ public class MainApp extends Application {
                 HelpTab.createHelpTab()
         );
 
+        // --- Watermark Logo ---
+        // Load your logo image (adjust path if needed)
+        Image logo = new Image("file:src/main/resources/logo.png");
+        ImageView logoView = new ImageView(logo);
 
+        // Make it look like a watermark
+        logoView.setOpacity(0.15);       // faint transparency
+        logoView.setPreserveRatio(true); // keep proportions
+        logoView.setFitWidth(300);       // scale logo size
 
-        // Layout
-        BorderPane root = new BorderPane();
-        root.setCenter(tabPane);
+        // Layout: put logo behind everything
+        BorderPane content = new BorderPane();
+        content.setCenter(tabPane);
 
+        StackPane root = new StackPane();
+        // StackPane automatically centers the first child (logo) in the window
+        root.getChildren().addAll(logoView, content);
+
+        // Scene
         Scene scene = new Scene(root, 900, 600);
         primaryStage.setScene(scene);
         primaryStage.show();

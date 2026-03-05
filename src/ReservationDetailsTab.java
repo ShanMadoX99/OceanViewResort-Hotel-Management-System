@@ -3,6 +3,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import java.time.LocalDate;
 
 public class ReservationDetailsTab {
 
@@ -87,8 +88,8 @@ public class ReservationDetailsTab {
                     contactField.setText(record.getContactNo());
                     emailField.setText(record.getEmail());
                     roomTypeBox.setValue(record.getRoomType());
-                    checkInPicker.setValue(java.time.LocalDate.parse(record.getCheckIn()));
-                    checkOutPicker.setValue(java.time.LocalDate.parse(record.getCheckOut()));
+                    checkInPicker.setValue(LocalDate.parse(record.getCheckIn()));
+                    checkOutPicker.setValue(LocalDate.parse(record.getCheckOut()));
 
                     table.setItems(result);
                 } else {
@@ -104,6 +105,22 @@ public class ReservationDetailsTab {
         // 🔹 Update Action
         updateButton.setOnAction(e -> {
             try {
+                if (reservationIdField.getText().isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR,
+                            "❌ Updates can only be done using Reservation ID (Customer ID cannot be used).");
+                    alert.showAndWait();
+                    return;
+                }
+
+                LocalDate inDate = checkInPicker.getValue();
+                LocalDate outDate = checkOutPicker.getValue();
+                if (inDate != null && outDate != null && outDate.isBefore(inDate)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR,
+                            "❌ Invalid entry: Check-Out date cannot be earlier than Check-In date.");
+                    alert.showAndWait();
+                    return;
+                }
+
                 int reservationId = Integer.parseInt(reservationIdField.getText());
                 ReservationService service = new ReservationService();
                 String result = service.updateReservation(
