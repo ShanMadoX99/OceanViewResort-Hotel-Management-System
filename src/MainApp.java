@@ -19,8 +19,8 @@ public class MainApp extends Application {
                 ReservationTab.createReservationTab(),
                 ReservationDetailsTab.createReservationDetailsTab(),
                 BillsTab.createBillsTab(),
-                HelpTab.createHelpTab(),
-                ReportTab.createReportTab()
+                ReportTab.createReportTab(),
+                HelpTab.createHelpTab()
         );
 
 

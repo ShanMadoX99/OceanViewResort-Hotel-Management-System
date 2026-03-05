@@ -1,37 +1,66 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationDetailsService {
 
-    public ObservableList<ReservationRecord> getReservationsByCustomerId(int customerId) {
-        ObservableList<ReservationRecord> list = FXCollections.observableArrayList();
-        try {
-            Connection conn = DBConnection.getConnection();
-            String sql = "SELECT r.reservation_id, r.customer_id, c.name, c.contact_no, " +
-                    "r.room_type, r.check_in, r.check_out " +
-                    "FROM reservations r JOIN customers c ON r.customer_id = c.customer_id " +
-                    "WHERE r.customer_id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            ResultSet rs = ps.executeQuery();
+    // In-memory list of reservations (shared across tabs)
+    private static final List<ReservationRecord> reservations = new ArrayList<>();
 
-            while (rs.next()) {
-                list.add(new ReservationRecord(
-                        rs.getInt("reservation_id"),
-                        rs.getInt("customer_id"),
-                        rs.getString("name"),
-                        rs.getString("contact_no"),
-                        rs.getString("room_type"),
-                        rs.getDate("check_in").toString(),
-                        rs.getDate("check_out").toString()
-                ));
+    // ✅ Called from ReservationTab when adding a new reservation
+    public static void addReservationRecord(ReservationRecord record) {
+        reservations.add(record);
+    }
+
+    // ✅ Read: Get all reservations for a customer
+    public ObservableList<ReservationRecord> getReservationsByCustomerId(int customerId) {
+        List<ReservationRecord> result = new ArrayList<>();
+        for (ReservationRecord r : reservations) {
+            if (r.getCustomerId() == customerId) {
+                result.add(r);
             }
-        } catch (Exception e) {
-            System.err.println("❌ Error fetching reservations: " + e.getMessage());
         }
-        return list;
+        return FXCollections.observableArrayList(result);
+    }
+
+    // ✅ Helper: Find a single reservation by Customer ID
+    public ReservationRecord findReservationById(int customerId) {
+        for (ReservationRecord r : reservations) {
+            if (r.getCustomerId() == customerId) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    // ✅ Update: Modify reservation details
+    public String updateReservation(int customerId, String name, String address,
+                                    String contact, String email, String roomType,
+                                    String checkIn, String checkOut) {
+        ReservationRecord r = findReservationById(customerId);
+        if (r != null) {
+            if (name != null && !name.isEmpty()) r.setCustomerName(name);
+            if (address != null && !address.isEmpty()) r.setAddress(address);
+            if (contact != null && !contact.isEmpty()) r.setContactNo(contact);
+            if (email != null && !email.isEmpty()) r.setEmail(email);
+            if (roomType != null && !roomType.isEmpty()) r.setRoomType(roomType);
+            if (checkIn != null && !checkIn.isEmpty()) r.setCheckIn(checkIn);
+            if (checkOut != null && !checkOut.isEmpty()) r.setCheckOut(checkOut);
+
+            return "✅ Reservation updated successfully!";
+        }
+        return "❌ Reservation not found.";
+    }
+
+    // ✅ Delete: Remove reservation
+    public String deleteReservation(int customerId) {
+        ReservationRecord r = findReservationById(customerId);
+        if (r != null) {
+            reservations.remove(r);
+            return "✅ Reservation deleted successfully!";
+        }
+        return "❌ Reservation not found.";
     }
 }
