@@ -2,6 +2,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 public class ReservationDetailsTab {
 
@@ -10,6 +11,9 @@ public class ReservationDetailsTab {
 
         TextField reservationIdField = new TextField();
         reservationIdField.setPromptText("Enter Reservation ID");
+
+        TextField customerIdField = new TextField();
+        customerIdField.setPromptText("Or Enter Customer ID");
 
         Button searchButton = new Button("Search Reservation");
 
@@ -62,11 +66,18 @@ public class ReservationDetailsTab {
 
         // 🔹 Search Action
         searchButton.setOnAction(e -> {
-            try {
-                int reservationId = Integer.parseInt(reservationIdField.getText());
-                ReservationService service = new ReservationService();
+            ReservationService service = new ReservationService();
+            ObservableList<ReservationRecord> result = FXCollections.observableArrayList();
 
-                ObservableList<ReservationRecord> result = service.getReservationById(reservationId);
+            try {
+                if (!reservationIdField.getText().isEmpty()) {
+                    int reservationId = Integer.parseInt(reservationIdField.getText());
+                    result = service.getReservationById(reservationId);
+                } else if (!customerIdField.getText().isEmpty()) {
+                    int customerId = Integer.parseInt(customerIdField.getText());
+                    result = service.getReservationsByCustomerId(customerId);
+                }
+
                 if (!result.isEmpty()) {
                     ReservationRecord record = result.get(0);
 
@@ -85,7 +96,7 @@ public class ReservationDetailsTab {
                     alert.showAndWait();
                 }
             } catch (NumberFormatException ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Please enter a valid Reservation ID.");
+                Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Please enter a valid ID.");
                 alert.showAndWait();
             }
         });
@@ -126,6 +137,7 @@ public class ReservationDetailsTab {
 
                 // Clear fields after delete
                 reservationIdField.clear();
+                customerIdField.clear();
                 nameField.clear();
                 addressField.clear();
                 contactField.clear();
@@ -140,7 +152,7 @@ public class ReservationDetailsTab {
         });
 
         VBox vbox = new VBox(10,
-                reservationIdField, searchButton,
+                reservationIdField, customerIdField, searchButton,
                 nameField, addressField, contactField, emailField,
                 roomTypeBox, checkInPicker, checkOutPicker,
                 updateButton, deleteButton,

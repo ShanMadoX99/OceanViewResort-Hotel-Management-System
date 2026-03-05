@@ -69,7 +69,7 @@ public class ReservationService {
         }
     }
 
-    // ✅ Read: Get reservation by ID
+    // ✅ Read: Get reservation by Reservation ID
     public ObservableList<ReservationRecord> getReservationById(int reservationId) {
         ObservableList<ReservationRecord> result = FXCollections.observableArrayList();
         try {
@@ -102,7 +102,40 @@ public class ReservationService {
         return result;
     }
 
-    // ✅ Update: Modify reservation + customer details
+    // ✅ Read: Get reservations by Customer ID (added back)
+    public ObservableList<ReservationRecord> getReservationsByCustomerId(int customerId) {
+        ObservableList<ReservationRecord> result = FXCollections.observableArrayList();
+        try {
+            Connection conn = DBConnection.getConnection();
+            String sql = "SELECT r.reservation_id, r.customer_id, c.name, c.address, c.contact_no, c.email, " +
+                    "r.room_type, r.check_in, r.check_out " +
+                    "FROM reservations r JOIN customers c ON r.customer_id = c.customer_id " +
+                    "WHERE r.customer_id=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ReservationRecord record = new ReservationRecord(
+                        rs.getInt("reservation_id"),
+                        rs.getInt("customer_id"),
+                        rs.getString("name"),
+                        rs.getString("address"),
+                        rs.getString("contact_no"),
+                        rs.getString("email"),
+                        rs.getString("room_type"),
+                        rs.getString("check_in"),
+                        rs.getString("check_out")
+                );
+                result.add(record);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    // ✅ Update
     public String updateReservation(int reservationId, String name, String address,
                                     String contact, String email, String roomType,
                                     String checkIn, String checkOut) {
